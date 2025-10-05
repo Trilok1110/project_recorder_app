@@ -18,20 +18,35 @@ class RecordingGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.8, // Square cards
-        ),
-        itemCount: recordings.length,
-        itemBuilder: (context, index) {
-          final recording = recordings[index];
-          return RecordingCard(
-            recording: recording,
-            onPlayPressed: () => onPlayPressed(recording),
-            onDeletePressed: () => onDeletePressed(recording.id),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const crossAxisSpacing = 16.0;
+          final cardWidth = (constraints.maxWidth - crossAxisSpacing) / 2;
+          final aspectRatio = 109 / 75;
+          final cardHeight = cardWidth / aspectRatio;
+
+          return GridView.builder(
+            padding: const EdgeInsets.only(top: 24),
+            physics: const BouncingScrollPhysics(),
+            itemCount: recordings.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: crossAxisSpacing,
+              mainAxisSpacing: 16,
+              childAspectRatio: aspectRatio, // 👈 perfect ratio 109:75
+            ),
+            itemBuilder: (context, index) {
+              final recording = recordings[index];
+              return SizedBox(
+                width: cardWidth,
+                height: cardHeight,
+                child: RecordingCard(
+                  recording: recording,
+                  onPlayPressed: () => onPlayPressed(recording),
+                  onDeletePressed: () => onDeletePressed(recording.id),
+                ),
+              );
+            },
           );
         },
       ),

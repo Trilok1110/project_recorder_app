@@ -131,20 +131,20 @@ class _RecordingScreenState extends State<RecordingScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.surfaceWhite),
           onPressed: _cancelRecording,
         ),
         title: Text(
           _isRecording ? 'Recording' : 'Record',
           style: const TextStyle(
-            color: AppColors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: AppColors.surfaceWhite,
+        backgroundColor: AppColors.primaryBlue,
         elevation: 0,
-      ),
+      )
+,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

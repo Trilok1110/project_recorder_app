@@ -21,10 +21,7 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
         onError: Colors.white,
-      ).copyWith(
-        secondary: AppColors.primaryBlue,
-        error: AppColors.accentRed,
-      ),
+      ).copyWith(secondary: AppColors.primaryBlue, error: AppColors.accentRed),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
           fontSize: 32,
