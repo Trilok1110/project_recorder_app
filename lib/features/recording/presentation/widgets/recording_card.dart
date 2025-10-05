@@ -23,19 +23,21 @@ class RecordingCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: .1),
-            blurRadius: 4,
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Stack(
         children: [
+          // Content
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Recording Title
                 Text(
                   recording.title,
                   style: const TextStyle(
@@ -49,6 +51,7 @@ class RecordingCard extends StatelessWidget {
 
                 const Spacer(),
 
+                // Duration and Date
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -73,17 +76,20 @@ class RecordingCard extends StatelessWidget {
             ),
           ),
 
+          // Action Buttons
           Positioned(
             top: 8,
             right: 8,
             child: Row(
               children: [
+                // Play Button
                 _buildIconButton(
                   icon: Icons.play_arrow_rounded,
                   color: AppColors.primaryBlue,
                   onPressed: onPlayPressed,
                 ),
                 const SizedBox(width: 4),
+                // Delete Button
                 _buildIconButton(
                   icon: Icons.delete_outline_rounded,
                   color: AppColors.accentRed,
@@ -108,8 +114,8 @@ class RecordingCard extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 2,
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
             offset: const Offset(0, 1),
           ),
         ],
@@ -119,10 +125,7 @@ class RecordingCard extends StatelessWidget {
         color: color,
         onPressed: onPressed,
         padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(
-          minWidth: 32,
-          minHeight: 32,
-        ),
+        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
       ),
     );
   }

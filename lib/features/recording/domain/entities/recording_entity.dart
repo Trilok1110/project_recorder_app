@@ -36,6 +36,7 @@ class RecordingEntity {
     }
   }
 
+
   // Format duration for display
   String get formattedDuration {
     final hours = duration.inHours.remainder(24).toString().padLeft(2, '0');

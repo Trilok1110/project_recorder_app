@@ -1,133 +1,87 @@
 import 'package:flutter/material.dart';
-import 'package:recorder_app/core/constants/app_colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recorder_app/core/theme/app_theme.dart';
-import 'package:recorder_app/features/employee/presentation/pages/employee_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+// Employee Imports
 import 'core/network/api_client.dart';
 import 'features/employee/data/data_sources/employee_remote_data_source.dart';
 import 'features/employee/data/repositories/employee_repository_impl.dart';
 import 'features/employee/domain/usecases/get_employees.dart';
 import 'features/employee/presentation/bloc/employee_bloc.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
+// Recording Imports
+import 'features/recording/data/data_sources/recording_local_data_source.dart';
+import 'features/recording/data/repositories/recording_repository_impl.dart';
+import 'features/recording/domain/usecases/delete_recording.dart';
+import 'features/recording/domain/usecases/get_recordings.dart';
+import 'features/recording/domain/usecases/save_recording.dart';
+import 'features/recording/presentation/bloc/recording_bloc.dart';
+import 'features/recording/presentation/bloc/recording_event.dart';
+import 'home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+
+  // Initialize SharedPreferences for Recording feature
+  final sharedPreferences = await SharedPreferences.getInstance();
+
+  runApp(MyApp(sharedPreferences: sharedPreferences));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final SharedPreferences sharedPreferences;
+
+  const MyApp({super.key, required this.sharedPreferences});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        // Employee Bloc
         BlocProvider<EmployeeBloc>(
           create: (context) => EmployeeBloc(
             getEmployees: GetEmployees(
               EmployeeRepositoryImpl(
-                remoteDataSource: EmployeeRemoteDataSourceImpl(apiClient: ApiClient()),
+                remoteDataSource: EmployeeRemoteDataSourceImpl(
+                  apiClient: ApiClient(),
+                ),
               ),
             ),
           ),
+        ),
+        // Recording Bloc - ADD THIS
+        BlocProvider<RecordingBloc>(
+          create: (context) => RecordingBloc(
+            getRecordings: GetRecordings(
+              RecordingRepositoryImpl(
+                localDataSource: RecordingLocalDataSourceImpl(
+                  sharedPreferences: sharedPreferences,
+                ),
+              ),
+            ),
+            saveRecording: SaveRecording(
+              RecordingRepositoryImpl(
+                localDataSource: RecordingLocalDataSourceImpl(
+                  sharedPreferences: sharedPreferences,
+                ),
+              ),
+            ),
+            deleteRecording: DeleteRecording(
+              RecordingRepositoryImpl(
+                localDataSource: RecordingLocalDataSourceImpl(
+                  sharedPreferences: sharedPreferences,
+                ),
+              ),
+            ),
+          )..add(LoadRecordings()),
         ),
       ],
       child: MaterialApp(
         title: 'Recorder App',
         theme: AppTheme.lightTheme,
-        home: const HomeScreen(),
+        home: HomeScreen(),
         debugShowCheckedModeBanner: false,
       ),
-    );
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Recorder'),
-        leading: Icon(Icons.menu),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child:
-          Container(
-            color: AppColors.surfaceWhite,
-            child: TabBar(
-              controller: _tabController,
-              labelColor: AppColors.primaryBlue,
-              unselectedLabelColor: AppColors.textTertiary,
-              indicator: UnderlineTabIndicator(
-                borderSide: BorderSide(
-                  color: AppColors.primaryBlue,
-                  width: 3,
-                ),
-                insets: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.35,
-                ),
-              ),
-              labelStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Roboto',
-              ),
-              unselectedLabelStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Roboto',
-              ),
-              tabs: const [
-                Tab(text: 'RECORDING'),
-                Tab(text: 'EMPLOYEE'),
-              ],
-            ),
-          ),
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          const Center(child: Text('Recording Tab')),
-          EmployeePage(),
-        ],
-      ),
-      floatingActionButton: _tabController.index == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Placeholder()),
-                );
-              },
-              child: const Icon(Icons.mic, color: Colors.white),
-            )
-          : null,
     );
   }
 }
