@@ -19,7 +19,7 @@ class AppColors {
 
   // Gender Colors
   static const Color genderFemale = Color(0xFFEC4899); // ♀ Female
-  static const Color genderMale = Color(0xFF3B82F6); // ♂ Male
+  static const Color genderMale = Color(0xFF113C6D); // ♂ Male#113C6D
 
   // Card Color Palette (6 Options)
   static const Color cardRed = Color(0xFFEF4444);

@@ -93,7 +93,7 @@ class AppTheme {
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.accentRed,
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
       ),
     );
