@@ -76,28 +76,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         leading: Icon(Icons.menu),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
-          child: Container(
-            color: Colors.white,
-            child:TabBar(
+          child:
+          Container(
+            color: AppColors.surfaceWhite,
+            child: TabBar(
               controller: _tabController,
               labelColor: AppColors.primaryBlue,
-              unselectedLabelColor: Colors.grey,
+              unselectedLabelColor: AppColors.textTertiary,
               indicator: UnderlineTabIndicator(
                 borderSide: BorderSide(
                   color: AppColors.primaryBlue,
-                  width: 3, // indicator thickness
+                  width: 3,
                 ),
                 insets: EdgeInsets.symmetric(
-                  horizontal:
-                  MediaQuery.of(context).size.width * 0.35,
+                  horizontal: MediaQuery.of(context).size.width * 0.35,
                 ),
+              ),
+              labelStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Roboto',
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Roboto',
               ),
               tabs: const [
                 Tab(text: 'RECORDING'),
-                Tab(text: 'Employee'),
+                Tab(text: 'EMPLOYEE'),
               ],
-            )
-
+            ),
           ),
         ),
       ),
@@ -118,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               },
               child: const Icon(Icons.mic, color: Colors.white),
             )
-          : null, // FAB only appears on first tab
+          : null,
     );
   }
 }

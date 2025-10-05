@@ -40,7 +40,7 @@ class _EmployeePageState extends State<EmployeePage> {
         if (state is EmployeeLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is EmployeeLoaded) {
-          return ListView.builder(
+          return ListView.builder(padding: EdgeInsets.only(top: 16),
             controller: _scrollController,
             itemCount: state.employees.length,
             itemBuilder: (context, index) {

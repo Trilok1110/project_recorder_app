@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  // Add these to your AppColors class
   // Primary Colors
   static const Color primaryBlue = Color(0xFF113C6D);
   static const Color accentRed = Color(0xFFEF4444);

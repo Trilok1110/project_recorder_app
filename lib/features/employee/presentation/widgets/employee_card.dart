@@ -31,7 +31,6 @@ class EmployeeCard extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Main Card
           Card(
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -44,7 +43,6 @@ class EmployeeCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name + Email (without avatar)
                   SizedBox(height: 8),
                   Text(
                     employee.fullName,
@@ -83,7 +81,6 @@ class EmployeeCard extends StatelessWidget {
             ),
           ),
 
-          // Avatar on top-right (half out)
           Positioned(
             top: -20,
             right: 20,
@@ -106,39 +103,53 @@ class EmployeeCard extends StatelessWidget {
   }
 
   Widget _buildDetailRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(label, style: AppTextStyles.employeeDetailLabel),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(value, style: AppTextStyles.employeeDetailValue ,),
-        ),
-      ],
+    return SizedBox(
+      width: 294,
+      height: 14,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // ← Figma alignment
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.employeeDetailLabel,
+          ),
+          Text(
+            value,
+            style: AppTextStyles.employeeDetailValue,
+            textAlign: TextAlign.right,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildGenderRow(
-      String label, IconData icon, Color color, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(label, style: AppTextStyles.employeeDetailLabel),
-        ),
-        const SizedBox(width: 8),
-        Row(
-          children: [
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 4),
-            Text(text, style: AppTextStyles.genderTextWithColor(color)),
-          ],
-        ),
-      ],
+  Widget _buildGenderRow(String label, IconData icon, Color color, String text) {
+    return SizedBox(
+      width: 294,
+      height: 16,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.employeeDetailLabel,
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: color),
+              const SizedBox(width: 4),
+              Text(
+                text,
+                style: AppTextStyles.genderTextWithColor(color),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
+
 }
