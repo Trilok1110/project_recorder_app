@@ -1,4 +1,3 @@
-// lib/features/employee/domain/entities/employee_entity.dart
 import 'package:intl/intl.dart';
 
 class EmployeeEntity {

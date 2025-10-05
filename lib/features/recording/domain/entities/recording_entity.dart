@@ -1,34 +1,58 @@
-import 'package:equatable/equatable.dart';
+import 'dart:ui';
 
-class RecordingEntity extends Equatable {
+class RecordingEntity {
+  final String id;
   final String title;
-  final String color; // Hex string, e.g., '#EF4444'
+  final int colorValue; // Store as int for SharedPreferences
   final String filePath;
-  final String date; // ISO8601 string, e.g., '2023-10-05T12:00:00Z'
+  final DateTime dateCreated;
+  final Duration duration;
 
   const RecordingEntity({
+    required this.id,
     required this.title,
-    required this.color,
+    required this.colorValue,
     required this.filePath,
-    required this.date,
+    required this.dateCreated,
+    required this.duration,
   });
 
-  // JSON serialization for SharedPreferences storage
-  Map<String, dynamic> toJson() => {
-    'title': title,
-    'color': color,
-    'filePath': filePath,
-    'date': date,
-  };
+  // Convert to Color object
+  Color get color => Color(colorValue);
 
-  // Factory for JSON deserialization
-  factory RecordingEntity.fromJson(Map<String, dynamic> json) => RecordingEntity(
-    title: json['title'] as String,
-    color: json['color'] as String,
-    filePath: json['filePath'] as String,
-    date: json['date'] as String,
-  );
+  // Format date for display
+  String get formattedDate {
+    final now = DateTime.now();
+    final difference = now.difference(dateCreated);
+
+    if (difference.inDays == 0) {
+      return 'Today';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return '${dateCreated.day}/${dateCreated.month}/${dateCreated.year}';
+    }
+  }
+
+  // Format duration for display
+  String get formattedDuration {
+    final hours = duration.inHours.remainder(24).toString().padLeft(2, '0');
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+
+    return duration.inHours > 0
+        ? '$hours:$minutes:$seconds'
+        : '$minutes:$seconds';
+  }
 
   @override
-  List<Object> get props => [title, color, filePath, date];
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is RecordingEntity && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

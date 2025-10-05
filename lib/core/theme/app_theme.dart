@@ -17,11 +17,9 @@ class AppTheme {
         secondary: AppColors.primaryBlue,
         error: AppColors.accentRed,
         surface: AppColors.surfaceWhite,
-        background: AppColors.background,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
-        onBackground: AppColors.textPrimary,
         onError: Colors.white,
       ).copyWith(
         secondary: AppColors.primaryBlue,

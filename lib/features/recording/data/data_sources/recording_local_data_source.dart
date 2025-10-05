@@ -1,63 +1,73 @@
 import 'dart:convert';
 
+import '../models/recording_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:recorder_app/core/utils/logger.dart';
-import 'package:recorder_app/features/recording/domain/entities/recording_entity.dart';
 
-class RecordingLocalDataSource {
-  static const String _recordingsKey = 'recordings';
 
-  Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
+abstract class RecordingLocalDataSource {
+  Future<List<RecordingModel>> getRecordings();
+  Future<void> saveRecording(RecordingModel recording);
+  Future<void> deleteRecording(String id);
+  Future<void> updateRecording(RecordingModel recording);
+}
 
-  /// Retrieves all saved recordings as a list.
-  Future<List<RecordingEntity>> getRecordings() async {
+class RecordingLocalDataSourceImpl implements RecordingLocalDataSource {
+  final SharedPreferences sharedPreferences;
+
+  RecordingLocalDataSourceImpl({required this.sharedPreferences});
+
+  @override
+  Future<List<RecordingModel>> getRecordings() async {
     try {
-      final prefs = await _prefs;
-      final jsonString = prefs.getString(_recordingsKey);
-      if (jsonString == null) {
-        return const []; // Default empty list
-      }
-      final List<dynamic> jsonList = jsonDecode(jsonString);
-      return jsonList
-          .map((json) => RecordingEntity.fromJson(json as Map<String, dynamic>))
-          .toList();
+      final recordingsJson = sharedPreferences.getStringList('recordings') ?? [];
+      final recordings = recordingsJson.map((jsonString) {
+        final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
+        return RecordingModel.fromJson(jsonMap);
+      }).toList();
+
+      // Sort by date created (newest first)
+      recordings.sort((a, b) => b.dateCreated.compareTo(a.dateCreated));
+      return recordings;
     } catch (e) {
-      logger('Error loading recordings: $e');
-      return const [];
+      throw Exception('Failed to load recordings: $e');
     }
   }
 
-  /// Saves a recording by appending to the existing list.
-  Future<void> saveRecording(RecordingEntity recording) async {
+  @override
+  Future<void> saveRecording(RecordingModel recording) async {
     try {
-      final prefs = await _prefs;
-      final List<RecordingEntity> recordings = await getRecordings();
-      recordings.add(recording);
-      final jsonList = recordings.map((r) => r.toJson()).toList();
-      final jsonString = jsonEncode(jsonList);
-      await prefs.setString(_recordingsKey, jsonString);
-      logger('Saved recording: ${recording.title}');
+      final recordingsJson = sharedPreferences.getStringList('recordings') ?? [];
+      final recordingJson = json.encode(recording.toJson());
+      recordingsJson.add(recordingJson);
+
+      await sharedPreferences.setStringList('recordings', recordingsJson);
     } catch (e) {
-      logger('Error saving recording: $e');
-      rethrow;
+      throw Exception('Failed to save recording: $e');
     }
   }
 
-  /// Deletes a recording by matching filePath.
-  Future<void> deleteRecording(String filePath) async {
+  @override
+  Future<void> deleteRecording(String id) async {
     try {
-      final prefs = await _prefs;
-      final List<RecordingEntity> recordings = await getRecordings();
-      final updatedRecordings = recordings
-          .where((r) => r.filePath != filePath)
-          .toList();
-      final jsonList = updatedRecordings.map((r) => r.toJson()).toList();
-      final jsonString = jsonEncode(jsonList);
-      await prefs.setString(_recordingsKey, jsonString);
-      logger('Deleted recording with filePath: $filePath');
+      final recordingsJson = sharedPreferences.getStringList('recordings') ?? [];
+      final updatedRecordings = recordingsJson.where((jsonString) {
+        final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
+        return jsonMap['id'] != id;
+      }).toList();
+
+      await sharedPreferences.setStringList('recordings', updatedRecordings);
     } catch (e) {
-      logger('Error deleting recording: $e');
-      rethrow;
+      throw Exception('Failed to delete recording: $e');
+    }
+  }
+
+  @override
+  Future<void> updateRecording(RecordingModel recording) async {
+    try {
+      await deleteRecording(recording.id);
+      await saveRecording(recording);
+    } catch (e) {
+      throw Exception('Failed to update recording: $e');
     }
   }
 }
