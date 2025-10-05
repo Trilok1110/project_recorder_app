@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
+
 void logger(String message) {
 
-  print('[DEBUG] $message');
+  debugPrint('[DEBUG] $message');
 }
