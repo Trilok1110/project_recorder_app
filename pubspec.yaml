@@ -21,7 +21,10 @@ dependencies:
   intl:
   uuid:
   get_it:
-
+  permission_handler:
+  record:
+  path_provider:
+  audioplayers:
 
   cupertino_icons: ^1.0.8
 

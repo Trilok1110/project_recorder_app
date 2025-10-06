@@ -1,6 +1,9 @@
 import 'dart:async';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
 import 'package:recorder_app/core/constants/app_colors.dart';
 import 'package:recorder_app/features/recording/presentation/widgets/save_recording_dialog.dart';
 
@@ -16,11 +19,20 @@ class _RecordingScreenState extends State<RecordingScreen> {
   bool _isRecording = false;
   bool _isPaused = false;
   Timer? _timer;
+  final AudioRecorder _audioRecorder = AudioRecorder();
+  String? _audioFilePath;
 
   @override
   void initState() {
     super.initState();
     _resetToInitialState();
+    _requestPermissions();
+  }
+
+  Future<void> _requestPermissions() async {
+    await Permission.microphone.request();
+    await Permission.storage.request();
+    await Permission.manageExternalStorage.request();
   }
 
   void _resetToInitialState() {
@@ -28,56 +40,156 @@ class _RecordingScreenState extends State<RecordingScreen> {
       _isRecording = false;
       _isPaused = false;
       _recordingDuration = Duration.zero;
+      _audioFilePath = null;
     });
   }
 
-  void _startRecording() {
-    setState(() {
-      _isRecording = true;
-      _isPaused = false;
-    });
+  Future<String> _getRecordingPath() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final recordingsDir = Directory('${directory.path}/recordings');
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    if (!await recordingsDir.exists()) {
+      await recordingsDir.create(recursive: true);
+    }
+
+    return '${recordingsDir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.aac';
+  }
+
+  Future<void> _startRecording() async {
+    // Request permissions if not granted
+    if (!await Permission.microphone.isGranted) {
+      await _requestPermissions();
+      if (!await Permission.microphone.isGranted) {
+        _showErrorSnackBar('Microphone permission required');
+        return;
+      }
+    }
+
+    try {
+      // Get proper file path
+      _audioFilePath = await _getRecordingPath();
+
+      print('Starting recording at: $_audioFilePath');
+
+      // Start audio recording
+      await _audioRecorder.start(
+        const RecordConfig(),
+        path: _audioFilePath!,
+      );
+
       setState(() {
-        _recordingDuration += const Duration(seconds: 1);
+        _isRecording = true;
+        _isPaused = false;
+        _recordingDuration = Duration.zero;
       });
-    });
 
-    print('Audio recording started/resumed...');
+      // Start timer
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          _recordingDuration += const Duration(seconds: 1);
+        });
+      });
+
+      print('Audio recording started successfully');
+    } catch (e) {
+      print('Error starting recording: $e');
+      _showErrorSnackBar('Failed to start recording: $e');
+    }
   }
 
-  void _stopRecording() {
-    _timer?.cancel();
-    setState(() {
-      _isRecording = false;
-      _isPaused = true;
-    });
+  Future<void> _stopRecording() async {
+    try {
+      _timer?.cancel();
 
-    print('Audio recording paused...');
+      // Stop audio recording
+      final path = await _audioRecorder.stop();
+
+      // Use the returned path or fallback to stored path
+      _audioFilePath = path ?? _audioFilePath;
+
+      setState(() {
+        _isRecording = false;
+        _isPaused = true;
+      });
+
+      print('Audio recording stopped. File: $_audioFilePath');
+
+      // Verify file was created
+      if (_audioFilePath != null) {
+        final file = File(_audioFilePath!);
+        if (await file.exists()) {
+          final length = await file.length();
+          print('Recording file size: $length bytes');
+        } else {
+          print('Recording file was not created');
+        }
+      }
+    } catch (e) {
+      print('Error stopping recording: $e');
+      _showErrorSnackBar('Failed to stop recording: $e');
+    }
   }
 
-  void _cancelRecording() {
+  Future<void> _cancelRecording() async {
     _timer?.cancel();
+
+    try {
+      // Stop recording without saving
+      await _audioRecorder.stop();
+
+      // Delete the recording file if it exists
+      if (_audioFilePath != null) {
+        final file = File(_audioFilePath!);
+        if (await file.exists()) {
+          await file.delete();
+          print('Recording file deleted');
+        }
+      }
+    } catch (e) {
+      print('Error cancelling recording: $e');
+    }
+
     _resetToInitialState();
-
     print('Recording cancelled...');
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   void _saveRecording() {
     _timer?.cancel();
 
+    if (_audioFilePath == null) {
+      _showErrorSnackBar('No recording to save');
+      return;
+    }
+
     showDialog(
       context: context,
-      barrierDismissible: true,
-      builder: (context) =>
-          SaveRecordingDialog(recordingDuration: _recordingDuration),
+      barrierDismissible: false,
+      builder: (context) => SaveRecordingDialog(
+        recordingDuration: _recordingDuration,
+        audioFilePath: _audioFilePath!,
+      ),
     );
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.accentRed,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _audioRecorder.dispose();
     super.dispose();
   }
 
@@ -143,8 +255,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
         ),
         backgroundColor: AppColors.primaryBlue,
         elevation: 0,
-      )
-,
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -205,10 +316,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
                   buttonSize: 66,
                   backgroundColor: Colors.transparent,
                   iconColor: _isPaused
-                      ? Colors.greenAccent
+                      ? Colors.green
                       : (_isRecording
-                            ? AppColors.textPrimary
-                            : AppColors.textTertiary),
+                      ? AppColors.textPrimary
+                      : AppColors.textTertiary),
                   onPressed: _isPaused ? _saveRecording : null,
                 ),
               ],
@@ -233,10 +344,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
       height: buttonSize,
       decoration: isCenterButton
           ? BoxDecoration(
-              color: backgroundColor,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 1),
-            )
+        color: backgroundColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 1),
+      )
           : BoxDecoration(color: backgroundColor, shape: BoxShape.circle),
       child: IconButton(
         icon: Icon(icon, size: iconSize),
