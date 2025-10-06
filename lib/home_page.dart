@@ -33,8 +33,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Recorder'),
-        leading: Icon(Icons.menu),
+        title: const Text('NowAWave Voice Recorder'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Image.asset(
+              'assets/app_logo.webp',
+              width: 40,
+              height: 40,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],       leading: Icon(Icons.menu),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(

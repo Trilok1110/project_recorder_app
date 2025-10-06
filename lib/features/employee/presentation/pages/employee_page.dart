@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/employee_bloc.dart';
 import '../widgets/employee_card.dart';
+import '../widgets/employee_card_shimmer.dart';
 
 class EmployeePage extends StatefulWidget {
   const EmployeePage({super.key});
@@ -38,8 +39,13 @@ class _EmployeePageState extends State<EmployeePage> {
     return BlocBuilder<EmployeeBloc, EmployeeState>(
       builder: (context, state) {
         if (state is EmployeeLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is EmployeeLoaded) {
+          return ListView.builder(
+            padding: const EdgeInsets.only(top: 16),
+            itemCount: 6,
+            itemBuilder: (context, index) => const EmployeeCardShimmer(),
+          );
+        }
+        else if (state is EmployeeLoaded) {
           return ListView.builder(padding: EdgeInsets.only(top: 16),
             controller: _scrollController,
             itemCount: state.employees.length,

@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:recorder_app/core/constants/app_colors.dart';
 import 'package:recorder_app/features/recording/presentation/widgets/save_recording_dialog.dart';
-
 import '../../../../core/utils/logger.dart';
 
 class RecordingScreen extends StatefulWidget {
@@ -58,7 +57,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
   }
 
   Future<void> _startRecording() async {
-    // Request permissions if not granted
     if (!await Permission.microphone.isGranted) {
       await _requestPermissions();
       if (!await Permission.microphone.isGranted) {
@@ -68,12 +66,9 @@ class _RecordingScreenState extends State<RecordingScreen> {
     }
 
     try {
-      // Get proper file path
       _audioFilePath = await _getRecordingPath();
-
       logger('Starting recording at: $_audioFilePath');
 
-      // Start audio recording
       await _audioRecorder.start(
         const RecordConfig(),
         path: _audioFilePath!,
@@ -85,7 +80,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
         _recordingDuration = Duration.zero;
       });
 
-      // Start timer
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         setState(() {
           _recordingDuration += const Duration(seconds: 1);
@@ -102,11 +96,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
   Future<void> _stopRecording() async {
     try {
       _timer?.cancel();
-
-      // Stop audio recording
       final path = await _audioRecorder.stop();
-
-      // Use the returned path or fallback to stored path
       _audioFilePath = path ?? _audioFilePath;
 
       setState(() {
@@ -116,7 +106,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
       logger('Audio recording stopped. File: $_audioFilePath');
 
-      // Verify file was created
       if (_audioFilePath != null) {
         final file = File(_audioFilePath!);
         if (await file.exists()) {
@@ -132,14 +121,11 @@ class _RecordingScreenState extends State<RecordingScreen> {
     }
   }
 
-  Future<void> _cancelRecording() async {
+  Future<void> _resetRecording() async {
     _timer?.cancel();
 
     try {
-      // Stop recording without saving
       await _audioRecorder.stop();
-
-      // Delete the recording file if it exists
       if (_audioFilePath != null) {
         final file = File(_audioFilePath!);
         if (await file.exists()) {
@@ -148,14 +134,11 @@ class _RecordingScreenState extends State<RecordingScreen> {
         }
       }
     } catch (e) {
-      logger('Error cancelling recording: $e');
+      logger('Error resetting recording: $e');
     }
 
     _resetToInitialState();
-    logger('Recording cancelled...');
-    if (mounted) {
-      Navigator.pop(context);
-    }
+    logger('Recording reset to initial state');
   }
 
   void _saveRecording() {
@@ -246,10 +229,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
         appBar: AppBar(
           backgroundColor: AppColors.primaryBlue,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: _cancelRecording,
-          ),
+
           title: Text(
             _isRecording ? 'Recording' : 'Record',
             style: const TextStyle(
@@ -258,7 +238,18 @@ class _RecordingScreenState extends State<RecordingScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          centerTitle: true,
+          centerTitle: false,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: Image.asset(
+                'assets/app_logo.webp',
+                width: 40,
+                height: 40,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ],
         ),
 
       body: Center(
@@ -279,16 +270,12 @@ class _RecordingScreenState extends State<RecordingScreen> {
               child: Icon(
                 Icons.mic,
                 size: 48,
-                color: _isRecording
-                    ? AppColors.accentRed
-                    : AppColors.primaryBlue,
+                color: AppColors.primaryBlue,
               ),
             ),
             const SizedBox(height: 39.67),
-
             _buildTimerText(),
             const SizedBox(height: 218.33),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -301,17 +288,13 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       ? AppColors.textPrimary
                       : AppColors.textTertiary,
                   onPressed: _isRecording || _isPaused
-                      ? _cancelRecording
+                      ? _resetRecording
                       : null,
                 ),
                 _buildControlButton(
-                  icon: _isRecording ? Icons.stop : Icons.mic,
-                  iconSize: 32,
-                  buttonSize: 66,
-                  backgroundColor: _isRecording
-                      ? const Color(0xFFD90000)
-                      : AppColors.primaryBlue,
-                  iconColor: Colors.white,
+                  isRecording: _isRecording,
+                  buttonSize: 90,
+                  backgroundColor: Colors.white,
                   onPressed: _isRecording ? _stopRecording : _startRecording,
                   isCenterButton: true,
                 ),
@@ -322,9 +305,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                   backgroundColor: Colors.transparent,
                   iconColor: _isPaused
                       ? Colors.green
-                      : (_isRecording
-                      ? AppColors.textPrimary
-                      : AppColors.textTertiary),
+                      : AppColors.textTertiary,
                   onPressed: _isPaused ? _saveRecording : null,
                 ),
               ],
@@ -336,26 +317,41 @@ class _RecordingScreenState extends State<RecordingScreen> {
   }
 
   Widget _buildControlButton({
-    required IconData icon,
-    required double iconSize,
+    IconData? icon,
+    double iconSize = 28,
     required double buttonSize,
     required Color backgroundColor,
-    required Color iconColor,
+    Color? iconColor,
     required VoidCallback? onPressed,
     bool isCenterButton = false,
+    bool isRecording = false,
   }) {
     return Container(
       width: buttonSize,
       height: buttonSize,
-      decoration: isCenterButton
-          ? BoxDecoration(
+      decoration: BoxDecoration(
         color: backgroundColor,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 1),
-      )
-          : BoxDecoration(color: backgroundColor, shape: BoxShape.circle),
+        border: isCenterButton
+            ? Border.all(color: Colors.white, width: 1)
+            : null,
+      ),
       child: IconButton(
-        icon: Icon(icon, size: iconSize),
+        icon: isCenterButton
+            ? AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: isRecording ? 40 : 50,
+          height: isRecording ? 40 : 50,
+          decoration: ShapeDecoration(
+            color: const Color(0xFFD90000),
+            shape: isRecording
+                ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            )
+                : const CircleBorder(),
+          ),
+        )
+            : Icon(icon, size: iconSize),
         color: iconColor,
         onPressed: onPressed,
         padding: EdgeInsets.zero,

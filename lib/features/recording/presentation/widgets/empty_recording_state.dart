@@ -14,7 +14,7 @@ class EmptyRecordingState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              "assets/not_found.png",
+              "assets/not_found.webp",
               width: 96,
               height: 96,
             ),

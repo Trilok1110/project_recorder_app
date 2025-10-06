@@ -130,9 +130,8 @@ class RecordingCard extends StatelessWidget {
 
               const SizedBox(width: 8),
 
-              // 🗑 Delete Button
               _buildActionButton(
-                icon: Icons.delete_outline_rounded,
+                icon: Icons.delete,
                 iconColor: AppColors.accentRed,
                 onPressed: onDeletePressed,
               ),

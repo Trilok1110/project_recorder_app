@@ -1,5 +1,5 @@
 name: recorder_app
-description: "A new Flutter project."
+description: "A new Flutter project Task my NowAWave Pvt. Ltd."
 type: application
 
 publish_to: 'none'
@@ -25,6 +25,7 @@ dependencies:
   record:
   path_provider:
   audioplayers:
+  shimmer:
 
   cupertino_icons: ^1.0.8
 
@@ -44,7 +45,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - assets\not_found.png
+     - assets\not_found.webp
+     - assets\app_logo.webp
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
