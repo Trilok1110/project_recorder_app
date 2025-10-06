@@ -1,6 +1,8 @@
 // lib/features/recording/domain/services/audio_player_service.dart
 import 'package:audioplayers/audioplayers.dart';
 
+import '../../../../core/utils/logger.dart';
+
 class AudioPlayerService {
   final AudioPlayer _audioPlayer = AudioPlayer();
   String? _currentPlayingId;
@@ -18,7 +20,7 @@ class AudioPlayerService {
       await _audioPlayer.play(DeviceFileSource(filePath));
       _currentPlayingId = recordingId;
     } catch (e) {
-      print('Error playing audio: $e');
+      logger('Error playing audio: $e');
       rethrow;
     }
   }
@@ -28,7 +30,7 @@ class AudioPlayerService {
       await _audioPlayer.stop();
       _currentPlayingId = null;
     } catch (e) {
-      print('Error stopping audio: $e');
+      logger('Error stopping audio: $e');
       rethrow;
     }
   }
@@ -37,7 +39,7 @@ class AudioPlayerService {
     try {
       await _audioPlayer.pause();
     } catch (e) {
-      print('Error pausing audio: $e');
+      logger('Error pausing audio: $e');
       rethrow;
     }
   }
@@ -46,7 +48,7 @@ class AudioPlayerService {
     try {
       await _audioPlayer.resume();
     } catch (e) {
-      print('Error resuming audio: $e');
+      logger('Error resuming audio: $e');
       rethrow;
     }
   }

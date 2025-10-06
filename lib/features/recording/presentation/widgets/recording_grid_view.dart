@@ -39,15 +39,21 @@ class RecordingGridView extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: crossAxisSpacing,
               mainAxisSpacing: 16,
-              childAspectRatio: aspectRatio, // 👈 perfect ratio 109:75
+              childAspectRatio: aspectRatio,
             ),
             itemBuilder: (context, index) {
               final recording = recordings[index];
+
+              final isThisPlaying = currentlyPlayingId == recording.id && isPlaying;
+              final isThisLoading = currentlyPlayingId == recording.id && isLoading;
+
               return SizedBox(
                 width: cardWidth,
                 height: cardHeight,
                 child: RecordingCard(
                   recording: recording,
+                  isPlaying: isThisPlaying,
+                  isLoading: isThisLoading,
                   onPlayPressed: () => onPlayPressed(recording),
                   onDeletePressed: () => onDeletePressed(recording.id),
                 ),

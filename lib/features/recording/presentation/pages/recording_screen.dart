@@ -7,6 +7,8 @@ import 'package:record/record.dart';
 import 'package:recorder_app/core/constants/app_colors.dart';
 import 'package:recorder_app/features/recording/presentation/widgets/save_recording_dialog.dart';
 
+import '../../../../core/utils/logger.dart';
+
 class RecordingScreen extends StatefulWidget {
   const RecordingScreen({super.key});
 
@@ -69,7 +71,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
       // Get proper file path
       _audioFilePath = await _getRecordingPath();
 
-      print('Starting recording at: $_audioFilePath');
+      logger('Starting recording at: $_audioFilePath');
 
       // Start audio recording
       await _audioRecorder.start(
@@ -90,9 +92,9 @@ class _RecordingScreenState extends State<RecordingScreen> {
         });
       });
 
-      print('Audio recording started successfully');
+      logger('Audio recording started successfully');
     } catch (e) {
-      print('Error starting recording: $e');
+      logger('Error starting recording: $e');
       _showErrorSnackBar('Failed to start recording: $e');
     }
   }
@@ -112,20 +114,20 @@ class _RecordingScreenState extends State<RecordingScreen> {
         _isPaused = true;
       });
 
-      print('Audio recording stopped. File: $_audioFilePath');
+      logger('Audio recording stopped. File: $_audioFilePath');
 
       // Verify file was created
       if (_audioFilePath != null) {
         final file = File(_audioFilePath!);
         if (await file.exists()) {
           final length = await file.length();
-          print('Recording file size: $length bytes');
+          logger('Recording file size: $length bytes');
         } else {
-          print('Recording file was not created');
+          logger('Recording file was not created');
         }
       }
     } catch (e) {
-      print('Error stopping recording: $e');
+      logger('Error stopping recording: $e');
       _showErrorSnackBar('Failed to stop recording: $e');
     }
   }
@@ -142,15 +144,15 @@ class _RecordingScreenState extends State<RecordingScreen> {
         final file = File(_audioFilePath!);
         if (await file.exists()) {
           await file.delete();
-          print('Recording file deleted');
+          logger('Recording file deleted');
         }
       }
     } catch (e) {
-      print('Error cancelling recording: $e');
+      logger('Error cancelling recording: $e');
     }
 
     _resetToInitialState();
-    print('Recording cancelled...');
+    logger('Recording cancelled...');
     if (mounted) {
       Navigator.pop(context);
     }
@@ -166,7 +168,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (context) => SaveRecordingDialog(
         recordingDuration: _recordingDuration,
         audioFilePath: _audioFilePath!,
@@ -241,21 +243,24 @@ class _RecordingScreenState extends State<RecordingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.surfaceWhite),
-          onPressed: _cancelRecording,
-        ),
-        title: Text(
-          _isRecording ? 'Recording' : 'Record',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+        appBar: AppBar(
+          backgroundColor: AppColors.primaryBlue,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: _cancelRecording,
           ),
+          title: Text(
+            _isRecording ? 'Recording' : 'Record',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          centerTitle: true,
         ),
-        backgroundColor: AppColors.primaryBlue,
-        elevation: 0,
-      ),
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -267,7 +272,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                 color: const Color(0xFFE8F2FF),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFFC5DEFF).withOpacity(0.25),
+                  color: const Color(0xFFC5DEFF).withValues(alpha: 0.25),
                   width: 13,
                 ),
               ),

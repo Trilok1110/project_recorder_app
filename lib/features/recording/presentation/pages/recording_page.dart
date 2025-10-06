@@ -9,6 +9,8 @@ import 'package:recorder_app/features/recording/presentation/pages/recording_scr
 import 'package:recorder_app/features/recording/presentation/widgets/empty_recording_state.dart';
 import 'package:recorder_app/features/recording/presentation/widgets/recording_grid_view.dart';
 
+import '../../../../core/navigation/slide_page_route.dart';
+
 class RecordingPage extends StatelessWidget {
   const RecordingPage({super.key});
 
@@ -58,8 +60,11 @@ class RecordingPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const RecordingScreen(),
+                SlidePageRoute(
+                  page: const RecordingScreen(),
+                  direction: AxisDirection.left, // move in from left
+                  curve: Curves.easeOut,
+                  duration: const Duration(milliseconds: 300),
                 ),
               );
             },

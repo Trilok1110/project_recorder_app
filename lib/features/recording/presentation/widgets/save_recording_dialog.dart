@@ -44,7 +44,7 @@ class _SaveRecordingDialogState extends State<SaveRecordingDialog> {
     final newRecording = RecordingEntity(
       id: const Uuid().v4(),
       title: title,
-      colorValue: AppColors.cardColors[_selectedColorIndex].value,
+      colorValue: AppColors.cardColors[_selectedColorIndex].toARGB32(),
       filePath: widget.audioFilePath,
       dateCreated: DateTime.now(),
       duration: widget.recordingDuration,
@@ -154,23 +154,26 @@ class _SaveRecordingDialogState extends State<SaveRecordingDialog> {
                   }),
                 ),
                 const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _saveRecording,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width/2.5,
+                    height: MediaQuery.of(context).size.width/6,
+                    child: ElevatedButton(
+                      onPressed: _saveRecording,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryBlue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'Submit',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                      child: const Text(
+                        'Submit',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
