@@ -7,7 +7,7 @@ class RecordingCard extends StatelessWidget {
   final VoidCallback onPlayPressed;
   final VoidCallback onDeletePressed;
   final bool isPlaying;
-
+  final bool isLoading;
 
   const RecordingCard({
     super.key,
@@ -15,12 +15,11 @@ class RecordingCard extends StatelessWidget {
     required this.onPlayPressed,
     required this.onDeletePressed,
     this.isPlaying = false,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       decoration: BoxDecoration(
@@ -39,28 +38,49 @@ class RecordingCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title and Duration
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              recording.title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  recording.title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  recording.formattedDuration,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
+
+          // Action Buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              // Play/Stop Button
               _buildActionButton(
                 icon: isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded,
                 iconColor: AppColors.primaryBlue,
                 onPressed: onPlayPressed,
+                isLoading: isLoading && !isPlaying,
               ),
               const SizedBox(width: 8),
+
+              // Delete Button
               _buildActionButton(
                 icon: Icons.delete_outline_rounded,
                 iconColor: AppColors.accentRed,
@@ -71,13 +91,13 @@ class RecordingCard extends StatelessWidget {
         ],
       ),
     );
-
   }
 
   Widget _buildActionButton({
     required IconData icon,
     required Color iconColor,
     required VoidCallback onPressed,
+    bool isLoading = false,
   }) {
     return Container(
       width: 32,
@@ -93,7 +113,15 @@ class RecordingCard extends StatelessWidget {
           ),
         ],
       ),
-      child: IconButton(
+      child: isLoading
+          ? const Padding(
+        padding: EdgeInsets.all(6),
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+        ),
+      )
+          : IconButton(
         onPressed: onPressed,
         icon: Icon(icon, color: iconColor, size: 18),
         padding: const EdgeInsets.all(4),

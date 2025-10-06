@@ -45,20 +45,17 @@ class _SaveRecordingDialogState extends State<SaveRecordingDialog> {
       id: const Uuid().v4(),
       title: title,
       colorValue: AppColors.cardColors[_selectedColorIndex].value,
-      filePath: widget.audioFilePath, // Use actual recorded file path
+      filePath: widget.audioFilePath,
       dateCreated: DateTime.now(),
       duration: widget.recordingDuration,
     );
 
-    // Save to bloc (this will automatically save to SharedPreferences)
-    context.read<RecordingBloc>().add(AddRecording(newRecording));
+    context.read<RecordingBloc>().add(AddRecordingEvent(newRecording));
 
-    // Close dialog and return to main page
     Navigator.pop(context); // Close dialog
     Navigator.pop(context); // Close recording screen and return to main page
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -137,7 +134,7 @@ class _SaveRecordingDialogState extends State<SaveRecordingDialog> {
                         height: 32,
                         decoration: BoxDecoration(
                           color: AppColors.cardColors[index],
-                          shape: BoxShape.circle,
+                          shape: BoxShape.rectangle,
                           border: _selectedColorIndex == index
                               ? Border.all(
                             color: AppColors.primaryBlue,

@@ -1,6 +1,7 @@
 
+
+import '../../domain/entities/recording_entity.dart';
 import 'package:equatable/equatable.dart';
-import 'package:recorder_app/features/recording/domain/entities/recording_entity.dart';
 
 abstract class RecordingEvent extends Equatable {
   const RecordingEvent();
@@ -9,18 +10,17 @@ abstract class RecordingEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadRecordings extends RecordingEvent {}
+class LoadRecordingsEvent extends RecordingEvent {}
 
-class AddRecording extends RecordingEvent {
+class AddRecordingEvent extends RecordingEvent {
   final RecordingEntity recording;
 
-  const AddRecording(this.recording);
+  const AddRecordingEvent(this.recording);
 
   @override
   List<Object> get props => [recording];
 }
 
-// Rename this to avoid conflict
 class DeleteRecordingEvent extends RecordingEvent {
   final String id;
 
@@ -28,4 +28,29 @@ class DeleteRecordingEvent extends RecordingEvent {
 
   @override
   List<Object> get props => [id];
+}
+
+// Playback events - renamed to avoid conflicts
+class PlayRecordingEvent extends RecordingEvent {
+  final String recordingId;
+  final String filePath;
+
+  const PlayRecordingEvent(this.recordingId, this.filePath);
+
+  @override
+  List<Object> get props => [recordingId, filePath];
+}
+
+class StopRecordingEvent extends RecordingEvent {
+  const StopRecordingEvent();
+
+  @override
+  List<Object> get props => [];
+}
+
+class PauseRecordingEvent extends RecordingEvent {
+  const PauseRecordingEvent();
+
+  @override
+  List<Object> get props => [];
 }

@@ -5,6 +5,7 @@ import 'package:recorder_app/features/recording/domain/repositories/recording_re
 import 'package:recorder_app/features/recording/domain/usecases/get_recordings.dart';
 import 'package:recorder_app/features/recording/domain/usecases/save_recording.dart';
 import 'package:recorder_app/features/recording/domain/usecases/delete_recording.dart';
+import 'package:recorder_app/features/recording/domain/services/audio_player_service.dart';
 import 'package:recorder_app/features/recording/presentation/bloc/recording_bloc.dart';
 
 import 'features/recording/data/data_sources/recording_local_data_source.dart';
@@ -12,16 +13,16 @@ import 'features/recording/data/data_sources/recording_local_data_source.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  //! External
+  //External
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
 
-  //! Data sources
+  //Data sources
   sl.registerLazySingleton<RecordingLocalDataSource>(
         () => RecordingLocalDataSourceImpl(sharedPreferences: sl()),
   );
 
-  //! Repository
+  //Repository
   sl.registerLazySingleton<RecordingRepository>(
         () => RecordingRepositoryImpl(localDataSource: sl()),
   );
@@ -31,12 +32,16 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SaveRecording(sl()));
   sl.registerLazySingleton(() => DeleteRecording(sl()));
 
-  //! Bloc
+  //Services
+  sl.registerLazySingleton(() => AudioPlayerService()); // Add this
+
+  //Bloc
   sl.registerFactory(
         () => RecordingBloc(
       getRecordings: sl(),
       saveRecording: sl(),
-      deleteRecording: sl(),
+      deleteRecordingUseCase: sl(), // Fixed parameter name
+      audioPlayerService: sl(), // Add this
     ),
   );
 }

@@ -4,12 +4,18 @@ import 'package:recorder_app/features/recording/presentation/widgets/recording_c
 
 class RecordingGridView extends StatelessWidget {
   final List<RecordingEntity> recordings;
+  final String? currentlyPlayingId;
+  final bool isPlaying;
+  final bool isLoading;
   final Function(RecordingEntity) onPlayPressed;
   final Function(String) onDeletePressed;
 
   const RecordingGridView({
     super.key,
     required this.recordings,
+    required this.currentlyPlayingId,
+    required this.isPlaying,
+    required this.isLoading,
     required this.onPlayPressed,
     required this.onDeletePressed,
   });

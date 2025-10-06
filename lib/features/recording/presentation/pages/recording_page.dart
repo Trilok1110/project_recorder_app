@@ -4,11 +4,10 @@ import 'package:recorder_app/core/constants/app_colors.dart';
 import 'package:recorder_app/features/recording/domain/entities/recording_entity.dart';
 import 'package:recorder_app/features/recording/presentation/bloc/recording_bloc.dart';
 import 'package:recorder_app/features/recording/presentation/bloc/recording_event.dart';
+import 'package:recorder_app/features/recording/presentation/bloc/recording_state.dart'; // Fixed import
 import 'package:recorder_app/features/recording/presentation/pages/recording_screen.dart';
 import 'package:recorder_app/features/recording/presentation/widgets/empty_recording_state.dart';
 import 'package:recorder_app/features/recording/presentation/widgets/recording_grid_view.dart';
-
-import '../bloc/recording_state.dart';
 
 class RecordingPage extends StatelessWidget {
   const RecordingPage({super.key});
@@ -36,8 +35,11 @@ class RecordingPage extends StatelessWidget {
             } else {
               return RecordingGridView(
                 recordings: state.recordings,
+                currentlyPlayingId: state.currentlyPlayingId,
+                isPlaying: state.isPlaying,
+                isLoading: state.isLoading,
                 onPlayPressed: (recording) {
-                  _playRecording(context, recording);
+                  _handlePlayPressed(context, recording, state);
                 },
                 onDeletePressed: (id) {
                   _deleteRecording(context, id);
@@ -73,13 +75,21 @@ class RecordingPage extends StatelessWidget {
     );
   }
 
-  void _playRecording(BuildContext context, RecordingEntity recording) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Playing: ${recording.title}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  void _handlePlayPressed(BuildContext context, RecordingEntity recording, RecordingLoaded state) {
+    if (state.currentlyPlayingId == recording.id && state.isPlaying) {
+      // Stop currently playing recording
+      context.read<RecordingBloc>().add(const StopRecordingEvent());
+    } else if (state.currentlyPlayingId == recording.id && !state.isPlaying) {
+      // Resume paused recording
+      context.read<RecordingBloc>().add(PlayRecordingEvent(recording.id, recording.filePath));
+    } else {
+      // Stop any currently playing recording and start new one
+      if (state.currentlyPlayingId != null) {
+        context.read<RecordingBloc>().add(const StopRecordingEvent());
+      }
+      // Play the selected recording
+      context.read<RecordingBloc>().add(PlayRecordingEvent(recording.id, recording.filePath));
+    }
   }
 
   void _deleteRecording(BuildContext context, String id) {
@@ -95,7 +105,7 @@ class RecordingPage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              context.read<RecordingBloc>().add(DeleteRecordingEvent(id));
+              context.read<RecordingBloc>().add(DeleteRecordingEvent(id)); // Fixed event name
               Navigator.pop(context);
             },
             child: const Text(
